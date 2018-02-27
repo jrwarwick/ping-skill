@@ -1,0 +1,3 @@
+monitor ping status
+notify me on ping status change
+start ping alert

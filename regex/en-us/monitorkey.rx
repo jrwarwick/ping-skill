@@ -1,0 +1,3 @@
+monitor ping status (on|of|for) (?P<key>.*)
+notify me on ping status change (on|of|for) (?P<key>.*)
+start ping alert (on|of|for) (?P<key>.*)
