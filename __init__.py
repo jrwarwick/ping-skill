@@ -15,6 +15,7 @@ class PingSkill(MycroftSkill):
 
     def __init__(self):
         super(PingSkill, self).__init__(name="PingSkill")
+        self.host_last_state = dict()
 
     def initialize(self):
         self.load_data_files(dirname(__file__))
@@ -78,11 +79,37 @@ class PingSkill(MycroftSkill):
             #    ... so, `slashdot.com` is impossible to parse.
             #  replace: calm, come, cum, etc., with `com`, if last?
 
-    def handle_monitor_event(self,data):
+    def handle_monitor_event(self, data):
         pass
         # TODO: implement this stub
         # data will be hostname, maybe previous/current/initial status
-        # if http fails, it might still be interesting to fall back to the ping part anyway
+        # if http fails, it might still be interesting to fall back 
+        # to the ping part anyway
+        
+        if data.connect_type == 'ping':
+            status,result = commands.getstatusoutput("ping -c1 -w2 " + data.host)
+            if status == data.initstate:
+                LOGGER.debug("Watched ping status for host " + data.host +
+                             " remains the same.")
+            else:
+                self.speak('host ' + data.host + ' has just ' +
+                           ('come up', 'gone down')[status < 1])
+                self.host_last_state[data.host] = status
+                # stop watching, or possibly inquire as to whether or not
+                # mycroft should stop, or watch for just 2 cycles more or?
+        elif data.connect_type == 'http':
+            response = requests.get(data.host)
+            if response.reason + " " + str(response.status_code) == data.initstate:
+                LOGGER.debug("Watched http status for host " + data.host +
+                             " remains same.")
+            else:
+                self.speak('host ' + data.host + ' has just ' +
+                           ('come up', 'gone down')[status < 1] +
+                           " " + response.reason + " " + str(response.status_code))
+                self.host_last_state[data.host] = status
+                # stop watching, or possibly inquire as to whether or not
+                # mycroft should stop, or watch for just 2 cycles more or?
+
 
     def handle_monitor_intent(self, message):
         # TODO: also get to this point via conversational context
@@ -96,7 +123,7 @@ class PingSkill(MycroftSkill):
             hosts[l[0].strip()] = [l[1].strip(), l[2].strip()]
         f.close()
         
-        #https://community.mycroft.ai/t/running-background-processes-with-skills/2986/4?u=jrwarwick
+        # https://community.mycroft.ai/t/running-background-processes-with-skills/2986/4?u=jrwarwick
         k = message.data.get("key").lower()
         if k in hosts:
             #establish initial state, announce that, then declare intent to notify of CHANGE/TOGGLE

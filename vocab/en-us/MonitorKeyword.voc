@@ -1,3 +1,5 @@
 monitor ping status
+monitor icmp status
 notify me on ping status change
 start ping alert
+start ping watch
