@@ -1,0 +1,3 @@
+Server sagt: {{response}}
+Antwort ist: {{response}}
+{{response}}
