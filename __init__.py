@@ -1,3 +1,5 @@
+import pprint
+
 import requests
 import commands
 from os.path import dirname, join
@@ -35,6 +37,8 @@ class PingSkill(MycroftSkill):
         f.close()
         
         k = message.data.get("key").lower()
+        LOGGER.info(k + ' from ' + str(message.data))
+        LOGGER.info(pprint.PrettyPrinter().pprint(message))
         if k in hosts:
             if hosts[k][0] == '1':
                 response = requests.get(hosts[k][1])
@@ -61,16 +65,49 @@ class PingSkill(MycroftSkill):
                             'host' in result_message):
                         self.speak(result_message)
         else:
-            # way too complex to parse spoken full URLs, 
-            # just exit if keyword not found. 
-            self.speak_dialog("KeywordFailure")
-            LOGGER.info('Requested network node alias not found '
-                        'in hosts.txt registry.')
-            # Possible TODO: add spoken URL to ping
-            # Parse URL Libraries? Just google it and ping first result?
-            #  if any item in array is 'dot', replace with '.'?
-            #    ... so, `slashdot.com` is impossible to parse.
-            #  replace: calm, come, cum, etc., with `com`, if last?
+            # Internal aliasing/nicknames not matched, 
+            # Way too complex to parse spoken full URLs, 
+            # but maybe the user just uttered an "unregistered" but perfectly 
+            # valid DNS name so let's try normal public hierarchy resolution.
+            # Just exit if keyword not found, and we don't get an easy clean
+            # successful name resolution. Kind of best-effort, no guarantees.
+
+            # When we are doing "real" ping we don't use URLs, just hostnames.
+            # Mycroft normalization is pretty good already, however, 
+            # there will remain challenge that `slashdot.com` is difficult 
+            # to parse.
+            # Since normalization might break content a bit, 
+            # such as when "the" is actually part of domain name
+            # we shall fall back to rough self-processing of "raw" utterance.
+            k = (
+                message.data.get('utterance').strip().replace("ping ","")
+                .replace("dot",".").replace(" ","")
+            )
+            # TODO: finally look for and replace close homophones for
+            # for well known TLD strings$ occurring at end of utterance
+
+            LOGGER.debug("Trying for an ad-hoc DNS name key of " + k)
+            status,result = commands.getstatusoutput("host " + k)
+            # TODO: move ping-and-handle output into its own little function.
+            if status == 0:
+                status,result = commands.getstatusoutput("ping -c1 -w2 " + k)
+                if status == 0:
+                    data = {"response": result.split('/')[5]}
+                    self.speak_dialog("PingResponse", data)
+                else:
+                    self.speak_dialog("PingFailure")
+                    LOGGER.info(result)
+                    result_message = result.lower().strip()
+                    if result_message.startswith('ping:'):
+                        result_message = result_message[5:]
+                    if ('name' in result_message or 'dns' in result_message or
+                            'unknown host' in result_message):
+                        self.speak(result_message)
+            else:
+                self.speak_dialog("KeywordFailure")
+                LOGGER.info("Requested network node alias not found "
+                            "in hosts.txt registry. "
+                            "Also name resolution failed: " + result)
 
     # Ping/ Server responses usually don't take more than 1 or 2 seconds at
     # most to register so there isn't much opportunity to stop the operation.
