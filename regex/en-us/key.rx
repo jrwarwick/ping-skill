@@ -1,3 +1,9 @@
-ping (?P<key>.*)
-pink (?P<key>.*)
-pin (?P<key>.*)
+ping ip address (?P<key>.*)
+ping ip (?P<key>.*)
+send a ping to ip (?P<key>.*)
+send a ping to ip address (?P<key>.*)
+ping network host (?P<key>.*)
+send a ping to network host (?P<key>.*)
+ping DNS name (?P<key>.*)
+send a ping to DNS name (?P<key>.*)
+
