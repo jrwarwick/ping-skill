@@ -41,7 +41,7 @@ class PingSkill(MycroftSkill):
         if k in hosts:
             if hosts[k][0] == '1':
                 response = requests.get(hosts[k][1])
-                data = {"response": response.reason.replace('OK', 'OKAY') + 
+                data = {"response": response.reason.replace('OK', 'OKAY') +
                         " " + str(response.status_code)}
                 self.speak_dialog("ServerResponse", data)
             else:
