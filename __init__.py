@@ -1,7 +1,7 @@
 import pprint
 
 import requests
-import commands
+import subprocess
 from os.path import dirname, join
 
 from adapt.intent import IntentBuilder
@@ -46,7 +46,7 @@ class PingSkill(MycroftSkill):
                         str(response.status_code)}
                 self.speak_dialog("ServerResponse", data)
             else:
-                status,result = commands.getstatusoutput("ping -c1 -w2 "
+                status,result = subprocess.getstatusoutput("ping -c1 -w2 "
                                 + hosts[k][1][(hosts[k][1]).find("//")+1:].replace('/',''))
                 if status == 0:
                     data = {"response": result.split('/')[5]}
@@ -87,10 +87,10 @@ class PingSkill(MycroftSkill):
             # for well known TLD strings$ occurring at end of utterance
 
             LOGGER.debug("Trying for an ad-hoc DNS name key of " + k)
-            status,result = commands.getstatusoutput("host " + k)
+            status,result = subprocess.getstatusoutput("host " + k)
             # TODO: move ping-and-handle output into its own little function.
             if status == 0:
-                status,result = commands.getstatusoutput("ping -c1 -w2 " + k)
+                status,result = subprocess.getstatusoutput("ping -c1 -w2 " + k)
                 if status == 0:
                     data = {"response": result.split('/')[5]}
                     self.speak_dialog("PingResponse", data)
