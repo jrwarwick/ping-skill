@@ -34,19 +34,19 @@ class PingSkill(MycroftSkill):
             l = line.split(",")
             hosts[l[0].strip()] = [l[1].strip(), l[2].strip()]
         f.close()
- 
+
         k = message.data.get("key").lower()
         LOGGER.info(k + ' from ' + str(message.data))
         LOGGER.info(pprint.PrettyPrinter().pprint(message))
         if k in hosts:
             if hosts[k][0] == '1':
                 response = requests.get(hosts[k][1])
-                data = {"response": response.reason.replace('OK', 'OKAY') + " " +
-                        str(response.status_code)}
+                data = {"response": response.reason.replace('OK', 'OKAY') + 
+                        " " + str(response.status_code)}
                 self.speak_dialog("ServerResponse", data)
             else:
-                status,result = subprocess.getstatusoutput("ping -c1 -w2 "
-                                + hosts[k][1][(hosts[k][1]).find("//")+1:].replace('/', ''))
+                status,result = subprocess.getstatusoutput("ping -c1 -w2 " +
+                                hosts[k][1][(hosts[k][1]).find("//")+1:].replace('/', ''))
                 if status == 0:
                     data = {"response": result.split('/')[5]}
                     self.speak_dialog("PingResponse", data)
