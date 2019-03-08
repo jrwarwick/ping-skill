@@ -6,4 +6,3 @@ ping network host (?P<key>.*)
 send a ping to network host (?P<key>.*)
 ping DNS name (?P<key>.*)
 send a ping to DNS name (?P<key>.*)
-
