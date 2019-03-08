@@ -74,14 +74,12 @@ class PingSkill(MycroftSkill):
             # When we are doing "real" ping we don't use URLs, just hostnames.
             # Mycroft normalization is pretty good already, however,
             # there will remain challenge that `slashdot.com` is difficult
-            # to parse.
+            # to parse. A battle for another day.
             # Since normalization might break content a bit,
             # such as when "the" is actually part of domain name
             # we shall fall back to rough self-processing of "raw" utterance.
-            k = (
-                message.data.get('utterance').strip().replace("ping ", "")
-                .replace("dot", ".").replace(" ", "")
-            )
+
+            k = k.replace("dot", ".").replace(" ", "")
             # TODO: finally look for and replace close homophones for
             # for well known TLD strings$ occurring at end of utterance
 
@@ -101,7 +99,7 @@ class PingSkill(MycroftSkill):
                         result_message = result_message[5:]
                     if ('name' in result_message or 'dns' in result_message or
                             'unknown host' in result_message):
-                        self.speak(result_message)
+                        self.speak(result_message.replace(".", " dot "))
             else:
                 self.speak_dialog("KeywordFailure")
                 LOGGER.info("Requested network node alias not found "
