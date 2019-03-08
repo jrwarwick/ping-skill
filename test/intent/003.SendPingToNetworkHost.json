@@ -1,0 +1,8 @@
+{
+  "utterance": "send a ping to network host google",
+  "intent_type": "PingIntent",
+  "intent": {
+    "PingKeyword": "send a ping to network host",
+    "key": "google"
+  }
+}
