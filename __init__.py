@@ -38,6 +38,10 @@ class PingSkill(MycroftSkill):
         k = message.data.get("key").lower()
         LOGGER.info(k + ' from ' + str(message.data))
         LOGGER.info(pprint.PrettyPrinter().pprint(message))
+        if len(k.strip()) < 1:
+            LOGGER.info("User either did not specify key, or we kind of missed it. let us prompt user now")
+            self.speak("Please specify network node by IP address or by DNS name.")
+            k = self.get_response("SpecifyNetworkNode", 3)
         if k in hosts:
             if hosts[k][0] == '1':
                 response = requests.get(hosts[k][1])
@@ -79,7 +83,7 @@ class PingSkill(MycroftSkill):
             # such as when "the" is actually part of domain name
             # we shall fall back to rough self-processing of "raw" utterance.
 
-            k = k.replace("dot", ".").replace(" ", "")
+            k = k.replace("dot", ".").replace(" ", "").strip()
             # TODO: finally look for and replace close homophones for
             # for well known TLD strings$ occurring at end of utterance
 
