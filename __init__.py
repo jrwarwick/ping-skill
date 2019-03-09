@@ -22,7 +22,8 @@ class PingSkill(MycroftSkill):
         self.load_data_files(dirname(__file__))
 
         ping_intent = IntentBuilder("PingIntent")\
-            .require("PingKeyword").require("key").build()
+            .optionally("CommandKeyword").require("PingKeyword").require("NetworkNodeKeyword")\
+            .require("key").build()
         self.register_intent(ping_intent, self.handle_ping_intent)
 
     def handle_ping_intent(self, message):
@@ -40,7 +41,6 @@ class PingSkill(MycroftSkill):
         LOGGER.info(pprint.PrettyPrinter().pprint(message))
         if len(k.strip()) < 1:  ##hmm.. in recent testing seems like we never get here. consider modifying or dropping this.
             LOGGER.info("User either did not specify key, or we kind of missed it.")
-            self.speak("Please specify network node by IP address or by DNS name.")
             k = self.get_response("SpecifyNetworkNode")
         if k in hosts:
             if hosts[k][0] == '1':
