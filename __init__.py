@@ -36,8 +36,11 @@ class PingSkill(MycroftSkill):
             hosts[l[0].strip()] = [l[1].strip(), l[2].strip()]
         f.close()
 
-        k = message.data.get("key").lower()
+        # k = message.data.get("key").lower()
+        # this seems like a bad hack, but message.data.get method seems to omit the period and following.
+        k =  message.utterance_remainder().lower().strip()
         LOGGER.info(k + ' from ' + str(message.data))
+        LOGGER.info('  "remainder":' + message.utterance_remainder() )
         LOGGER.info(pprint.PrettyPrinter().pprint(message))
         if len(k.strip()) < 1:  ##hmm.. in recent testing seems like we never get here. consider modifying or dropping this.
             LOGGER.info("User either did not specify key, or we kind of missed it.")
