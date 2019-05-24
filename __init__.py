@@ -36,12 +36,24 @@ class PingSkill(MycroftSkill):
             hosts[l[0].strip()] = [l[1].strip(), l[2].strip()]
         f.close()
 
-        # k = message.data.get("key").lower()
-        # this seems like a bad hack, but message.data.get method seems to omit the period and following.
-        k =  message.utterance_remainder().lower().strip()
-        LOGGER.info(k + ' from ' + str(message.data))
-        LOGGER.info('  "remainder":' + message.utterance_remainder() )
-        LOGGER.info(pprint.PrettyPrinter().pprint(message))
+        # this one with the key works for slightly parsable things like google.com
+        k = message.data.get("key").lower()
+        # but it does not work with spelled out names. 
+        # following seems like a bad hack, but message.data.get method seems to omit the period and following.
+        # k =  message.utterance_remainder().lower().strip()
+        kk =  message.utterance_remainder().lower().strip()
+        LOGGER.debug('==COMPARE=  k: ' + k + '  vs.  kk: ' + kk)
+        # so double ugly hack: which one is longer? more likely to be the "right" content. Yuck yuck yuck. TODO: FIX THIS
+        if len(kk) > len(k):
+            k = kk
+        # more yuck: sometimes the "to " is left in...
+        if k.startswith("to "):
+            k = k[len("to "):]
+        LOGGER.debug('k='+k)
+        LOGGER.debug('   |__ from ' + str(message.data))
+        LOGGER.debug('   "remainder":' + message.utterance_remainder() )
+        LOGGER.debug(pprint.PrettyPrinter().pprint(message))
+        LOGGER.info('Extracted network node key: ' + k)
         if len(k.strip()) < 1:  ##hmm.. in recent testing seems like we never get here. consider modifying or dropping this.
             LOGGER.info("User either did not specify key, or we kind of missed it.")
             k = self.get_response("SpecifyNetworkNode")
