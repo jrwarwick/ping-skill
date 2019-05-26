@@ -22,7 +22,8 @@ class PingSkill(MycroftSkill):
         self.load_data_files(dirname(__file__))
 
         ping_intent = IntentBuilder("PingIntent")\
-            .require("PingKeyword").require("key").build()
+            .optionally("CommandKeyword").require("PingKeyword").require("NetworkNodeKeyword")\
+            .require("key").build()
         self.register_intent(ping_intent, self.handle_ping_intent)
 
     def handle_ping_intent(self, message):
@@ -35,13 +36,31 @@ class PingSkill(MycroftSkill):
             hosts[l[0].strip()] = [l[1].strip(), l[2].strip()]
         f.close()
 
+        # this one with the key works for slightly parsable things like google.com
         k = message.data.get("key").lower()
-        LOGGER.info(k + ' from ' + str(message.data))
-        LOGGER.info(pprint.PrettyPrinter().pprint(message))
+        # but it does not work with spelled out names. 
+        # following seems like a bad hack, but message.data.get method seems to omit the period and following.
+        # k =  message.utterance_remainder().lower().strip()
+        kk =  message.utterance_remainder().lower().strip()
+        LOGGER.debug('==COMPARE=  k: ' + k + '  vs.  kk: ' + kk)
+        # so double ugly hack: which one is longer? more likely to be the "right" content. Yuck yuck yuck. TODO: FIX THIS
+        if len(kk) > len(k):
+            k = kk
+        # more yuck: sometimes the "to " is left in...
+        if k.startswith("to "):
+            k = k[len("to "):]
+        LOGGER.debug('k='+k)
+        LOGGER.debug('   |__ from ' + str(message.data))
+        LOGGER.debug('   "remainder":' + message.utterance_remainder() )
+        LOGGER.debug(pprint.PrettyPrinter().pprint(message))
+        LOGGER.info('Extracted network node key: ' + k)
+        if len(k.strip()) < 1:  ##hmm.. in recent testing seems like we never get here. consider modifying or dropping this.
+            LOGGER.info("User either did not specify key, or we kind of missed it.")
+            k = self.get_response("SpecifyNetworkNode")
         if k in hosts:
             if hosts[k][0] == '1':
                 response = requests.get(hosts[k][1])
-                data = {"response": response.reason.replace('OK', 'OKAY') + 
+                data = {"response": response.reason.replace('OK', 'OKAY') +
                         " " + str(response.status_code)}
                 self.speak_dialog("ServerResponse", data)
             else:
@@ -74,16 +93,16 @@ class PingSkill(MycroftSkill):
             # When we are doing "real" ping we don't use URLs, just hostnames.
             # Mycroft normalization is pretty good already, however,
             # there will remain challenge that `slashdot.com` is difficult
-            # to parse.
+            # to parse. A battle for another day.
             # Since normalization might break content a bit,
             # such as when "the" is actually part of domain name
             # we shall fall back to rough self-processing of "raw" utterance.
-            k = (
-                message.data.get('utterance').strip().replace("ping ", "")
-                .replace("dot", ".").replace(" ", "")
-            )
+
+            LOGGER.debug(" k (key) before conditioning: " + k)
+            k = k.replace("dot", ".").replace(" ", "").strip()
             # TODO: finally look for and replace close homophones for
             # for well known TLD strings$ occurring at end of utterance
+            # TODO: is this a good time to set_context?
 
             LOGGER.debug("Trying for an ad-hoc DNS name key of " + k)
             status,result = subprocess.getstatusoutput("host " + k)
@@ -101,7 +120,7 @@ class PingSkill(MycroftSkill):
                         result_message = result_message[5:]
                     if ('name' in result_message or 'dns' in result_message or
                             'unknown host' in result_message):
-                        self.speak(result_message)
+                        self.speak(result_message.replace(".", " dot "))
             else:
                 self.speak_dialog("KeywordFailure")
                 LOGGER.info("Requested network node alias not found "

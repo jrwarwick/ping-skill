@@ -1,0 +1,8 @@
+{
+  "utterance": "ping ip address one dot one dot one dot one",
+  "intent_type": "PingIntent",
+  "intent": {
+    "PingKeyword": "ping ip address",
+    "key": "one dot one dot one dot one"
+  }
+}

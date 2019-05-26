@@ -1,0 +1,8 @@
+{
+  "utterance": "ping dns name csub.edu",
+  "intent_type": "PingIntent",
+  "intent": {
+    "PingKeyword": "ping dns name",
+    "key": "csub.edu"
+  }
+}
