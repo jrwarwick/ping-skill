@@ -38,12 +38,14 @@ class PingSkill(MycroftSkill):
 
         # this one with the key works for slightly parsable things like google.com
         k = message.data.get("key").lower()
-        # but it does not work with spelled out names. 
-        # following seems like a bad hack, but message.data.get method seems to omit the period and following.
+        # but it does not work with spelled out names.
+        # following seems like a bad hack, but message.data.get method 
+        # seems to omit the period and following.
         # k =  message.utterance_remainder().lower().strip()
         kk =  message.utterance_remainder().lower().strip()
         LOGGER.debug('==COMPARE=  k: ' + k + '  vs.  kk: ' + kk)
-        # so double ugly hack: which one is longer? more likely to be the "right" content. Yuck yuck yuck. TODO: FIX THIS
+        # so double ugly hack: which one is longer? more likely to be the "right" content. 
+        #Yuck yuck yuck. TODO: FIX THIS
         if len(kk) > len(k):
             k = kk
         # more yuck: sometimes the "to " is left in...
@@ -105,10 +107,10 @@ class PingSkill(MycroftSkill):
             # TODO: is this a good time to set_context?
 
             LOGGER.debug("Trying for an ad-hoc DNS name key of " + k)
-            status,result = subprocess.getstatusoutput("host " + k)
+            status, result = subprocess.getstatusoutput("host " + k)
             # TODO: move ping-and-handle output into its own little function.
             if status == 0:
-                status,result = subprocess.getstatusoutput("ping -c1 -w2 " + k)
+                status, result = subprocess.getstatusoutput("ping -c1 -w2 " + k)
                 if status == 0:
                     data = {"response": result.split('/')[5]}
                     self.speak_dialog("PingResponse", data)
