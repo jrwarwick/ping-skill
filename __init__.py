@@ -39,12 +39,12 @@ class PingSkill(MycroftSkill):
         # this one with the key works for slightly parsable things like google.com
         k = message.data.get("key").lower()
         # but it does not work with spelled out names.
-        # following seems like a bad hack, but message.data.get method 
+        # following seems like a bad hack, but message.data.get method
         # seems to omit the period and following.
         # k =  message.utterance_remainder().lower().strip()
         kk =  message.utterance_remainder().lower().strip()
         LOGGER.debug('==COMPARE=  k: ' + k + '  vs.  kk: ' + kk)
-        # so double ugly hack: which one is longer? more likely to be the "right" content. 
+        # so double ugly hack: which one is longer? more likely to be the "right" content.
         #Yuck yuck yuck. TODO: FIX THIS
         if len(kk) > len(k):
             k = kk
@@ -137,4 +137,3 @@ class PingSkill(MycroftSkill):
 
 def create_skill():
     return PingSkill()
-
