@@ -44,7 +44,7 @@ class PingSkill(MycroftSkill):
         # k =  message.utterance_remainder().lower().strip()
         kk =  message.utterance_remainder().lower().strip()
         LOGGER.debug('==COMPARE=  k: ' + k + '  vs.  kk: ' + kk)
-        # so double ugly hack: which one is longer? 
+        # so double ugly hack: which one is longer?
         #   more likely to be the "right" content.
         #Yuck yuck yuck. TODO: FIX THIS
         if len(kk) > len(k):
@@ -57,8 +57,8 @@ class PingSkill(MycroftSkill):
         LOGGER.debug('   "remainder":' + message.utterance_remainder() )
         LOGGER.debug(pprint.PrettyPrinter().pprint(message))
         LOGGER.info('Extracted network node key: ' + k)
-        if len(k.strip()) < 1:  
-            ##hmm.. in recent testing seems like we never get here. 
+        if len(k.strip()) < 1:
+            ##hmm.. in recent testing seems like we never get here.
             ##consider modifying or dropping this.
             LOGGER.info("User either did not specify key, or we kind of missed it.")
             k = self.get_response("SpecifyNetworkNode")
