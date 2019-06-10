@@ -44,7 +44,8 @@ class PingSkill(MycroftSkill):
         # k =  message.utterance_remainder().lower().strip()
         kk =  message.utterance_remainder().lower().strip()
         LOGGER.debug('==COMPARE=  k: ' + k + '  vs.  kk: ' + kk)
-        # so double ugly hack: which one is longer? more likely to be the "right" content.
+        # so double ugly hack: which one is longer? 
+        #   more likely to be the "right" content.
         #Yuck yuck yuck. TODO: FIX THIS
         if len(kk) > len(k):
             k = kk
@@ -56,7 +57,9 @@ class PingSkill(MycroftSkill):
         LOGGER.debug('   "remainder":' + message.utterance_remainder() )
         LOGGER.debug(pprint.PrettyPrinter().pprint(message))
         LOGGER.info('Extracted network node key: ' + k)
-        if len(k.strip()) < 1:  ##hmm.. in recent testing seems like we never get here. consider modifying or dropping this.
+        if len(k.strip()) < 1:  
+            ##hmm.. in recent testing seems like we never get here. 
+            ##consider modifying or dropping this.
             LOGGER.info("User either did not specify key, or we kind of missed it.")
             k = self.get_response("SpecifyNetworkNode")
         if k in hosts:
@@ -66,7 +69,7 @@ class PingSkill(MycroftSkill):
                         " " + str(response.status_code)}
                 self.speak_dialog("ServerResponse", data)
             else:
-                status,result = subprocess.getstatusoutput("ping -c1 -w2 " +
+                status, result = subprocess.getstatusoutput("ping -c1 -w2 " +
                                 hosts[k][1][(hosts[k][1]).find("//")+1:].replace('/', ''))
                 if status == 0:
                     data = {"response": result.split('/')[5]}
